@@ -495,6 +495,22 @@ For any requests, please contact %admin_email%';
 		 * @param object $phpmailer
 		 */
 		function send_html( $phpmailer ) {
+			$force_plain = false;
+
+			$custom_headers = $phpmailer->getCustomHeaders();
+			$phpmailer->clearCustomHeaders();
+			foreach ($custom_headers as $custom_header) {
+				if ((trim($custom_header[0]) == 'X-WPBE') && (trim($custom_header[1]) == 'text')) {
+					$force_plain = true;
+					$phpmailer->isHTML(false);
+					continue;
+				}
+				$phpmailer->addCustomHeader($custom_header[0], $custom_header[1]);
+			}
+
+			if ($force_plain) {
+				return;
+			}
 
 			$phpmailer->AltBody = $this->process_email_text( $phpmailer->Body );
 
