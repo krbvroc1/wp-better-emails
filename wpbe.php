@@ -501,6 +501,7 @@ For any requests, please contact %admin_email%';
 		function send_html( $phpmailer ) {
 
 			if ($this->convert_msg === false) {
+				$phpmailer->AltBody = '';
 				return;
 			}
 
