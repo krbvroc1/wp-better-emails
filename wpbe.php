@@ -40,6 +40,7 @@ if ( ! class_exists( 'WP_Better_Emails' ) ) {
 		var $options = array();
 		var $page = '';
 		var $send_as_html;
+		var $convert_msg;
 
 		/**
 		 * Construct function
@@ -463,8 +464,11 @@ For any requests, please contact %admin_email%';
 		 * @return string $content_type
 		 */
 		function set_content_type( $content_type ) {
+
+			$this->convert_msg = apply_filters( 'wpbe_convert_msg', true);
+
 			// Only convert if the message is text/plain and the template is ok
-			if ( $content_type == 'text/plain' && $this->check_template() === true ) {
+			if ( $content_type == 'text/plain' && $this->check_template() === true && $this->convert_msg === true ) {
 				$this->send_as_html = true;
 				return $content_type = 'text/html';
 			} else {
@@ -495,20 +499,8 @@ For any requests, please contact %admin_email%';
 		 * @param object $phpmailer
 		 */
 		function send_html( $phpmailer ) {
-			$force_plain = false;
 
-			$custom_headers = $phpmailer->getCustomHeaders();
-			$phpmailer->clearCustomHeaders();
-			foreach ($custom_headers as $custom_header) {
-				if ((trim($custom_header[0]) == 'X-WPBE') && (trim($custom_header[1]) == 'text')) {
-					$force_plain = true;
-					$phpmailer->isHTML(false);
-					continue;
-				}
-				$phpmailer->addCustomHeader($custom_header[0], $custom_header[1]);
-			}
-
-			if ($force_plain) {
+			if ($this->convert_msg === false) {
 				return;
 			}
 
